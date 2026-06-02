@@ -9498,6 +9498,9 @@ background-repeat: no-repeat;\
 			if (1 === type) {
 				var oRun = new AscCommonWord.ParaRun(oParagraph, false);
 				var newRunPr = oParagraph.Get_CompiledPr()?.ParaPr?.DefaultRunPr?.Copy();
+				console.log("插入文本时复制段落默认格式:", newRunPr);
+				console.log("插入文本内容:", text);
+				console.log("段落 CompiledPr:", oParagraph.Get_CompiledPr());
 				if (newRunPr) {
 					oRun.Set_Pr(newRunPr);
 				}
