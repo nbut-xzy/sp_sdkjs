@@ -9435,7 +9435,7 @@ background-repeat: no-repeat;\
 		}
 	};
 
-	asc_docs_api.prototype.asc_InsertTimestamp = function (text, sId, type) {
+	asc_docs_api.prototype.asc_insertCustomText = function (text, bookmarkName, type) {
 		try {
 			var oLogicDocument = this.private_GetLogicDocument();
 			if (!oLogicDocument) {
@@ -9443,9 +9443,9 @@ background-repeat: no-repeat;\
 				return false;
 			}
 			var oBookmarksManager = this.asc_GetBookmarksManager();
-			var oBookmark = oBookmarksManager.GetBookmarkByName(sId);
+			var oBookmark = oBookmarksManager.GetBookmarkByName(bookmarkName);
 			if (!oBookmark) {
-				console.warn("未找到书签: " + sId);
+				console.warn("未找到书签: " + bookmarkName);
 				return false;
 			}
 			oLogicDocument.StartAction();
@@ -9497,6 +9497,10 @@ background-repeat: no-repeat;\
 			if (insertPos > oParagraph.Content.length) insertPos = oParagraph.Content.length;
 			if (1 === type) {
 				var oRun = new AscCommonWord.ParaRun(oParagraph, false);
+				var newRunPr = oParagraph.Get_CompiledPr()?.ParaPr?.DefaultRunPr?.Copy();
+				if (newRunPr) {
+					oRun.Set_Pr(newRunPr);
+				}
 				oRun.AddText(text);
 				if (insertPos > oParagraph.Content.length) insertPos = oParagraph.Content.length;
 				oParagraph.Add_ToContent(insertPos, oRun);
@@ -13414,7 +13418,8 @@ background-repeat: no-repeat;\
 	asc_docs_api.prototype["asc_gotoSignature"] = asc_docs_api.prototype.asc_gotoSignature;
 	asc_docs_api.prototype["asc_getSignatureSetup"] = asc_docs_api.prototype.asc_getSignatureSetup;
 	asc_docs_api.prototype["asc_InsertSignature"] = asc_docs_api.prototype.asc_InsertSignature;
-	asc_docs_api.prototype["asc_InsertTimestamp"] = asc_docs_api.prototype.asc_InsertTimestamp;
+	asc_docs_api.prototype["asc_InsertTimestamp"] = asc_docs_api.prototype.asc_insertCustomText;
+	asc_docs_api.prototype["asc_insertCustomText"] = asc_docs_api.prototype.asc_insertCustomText;
 	// view modes
 	asc_docs_api.prototype["asc_setContentDarkMode"] = asc_docs_api.prototype.asc_setContentDarkMode;
 
