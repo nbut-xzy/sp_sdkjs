@@ -9450,6 +9450,10 @@ background-repeat: no-repeat;\
 			}
 			oLogicDocument.StartAction();
 			var oParagraph = oBookmark[0].GetParagraph();
+			console.log("1段落 CompiledPr:", oParagraph.Get_CompiledPr());
+			console.log("1段落:", oParagraph);
+			console.log("1段落 Pr:", oParagraph.Pr);
+			console.log("1段落 TextPr:", oParagraph.TextPr);
 			if (!oParagraph) {
 				oLogicDocument.FinalizeAction();
 				console.error("无法从书签获取段落");
@@ -9501,6 +9505,9 @@ background-repeat: no-repeat;\
 				console.log("插入文本时复制段落默认格式:", newRunPr);
 				console.log("插入文本内容:", text);
 				console.log("段落 CompiledPr:", oParagraph.Get_CompiledPr());
+				console.log("段落:", oParagraph);
+				console.log("段落 Pr:", oParagraph.Pr);
+				console.log("段落 TextPr:", oParagraph.TextPr);
 				if (newRunPr) {
 					oRun.Set_Pr(newRunPr);
 				}
