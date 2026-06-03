@@ -9497,8 +9497,8 @@ background-repeat: no-repeat;\
 			if (insertPos > oParagraph.Content.length) insertPos = oParagraph.Content.length;
 			if (1 === type) {
 				var oRun = new AscCommonWord.ParaRun(oParagraph, false);
-				var newRunPr = oParagraph.Get_CompiledPr()?.ParaPr?.DefaultRunPr?.Copy();
-				var ooooo = oParagraph.Get_CompiledPr();
+				// 此处已经是副本
+				var newRunPr = oParagraph.GetFirstRunPr();
 				debugger;
 				if (newRunPr) {
 					oRun.Set_Pr(newRunPr);
