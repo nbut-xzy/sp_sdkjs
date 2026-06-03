@@ -9436,6 +9436,153 @@ background-repeat: no-repeat;\
 	};
 
 	asc_docs_api.prototype.asc_insertCustomText = function (text, bookmarkName, type) {
+function deepLog(label, obj, options = {}) {
+    const { maxDepth = 3, showProto = false } = options;
+
+    console.group(`🔍 [${label}] 开始深度打印`);
+
+    // 1. 最简单的原始输出（预览用）
+    console.log(`📄 1. console.log原始输出:`, obj);
+
+    // 2. console.dir（支持depth和showHidden）
+    try {
+        console.dir(obj, { depth: maxDepth, showHidden: true, colors: true });
+        console.log(`📁 2. console.dir (depth=${maxDepth}, showHidden=true) 已输出`);
+    } catch (e) {
+        console.warn(`⚠️ console.dir 失败:`, e);
+    }
+
+    // 3. 尝试 JSON.stringify（带循环引用处理）
+    try {
+        const seen = new WeakSet();
+        const jsonSafeReplacer = (key, value) => {
+            if (typeof value === 'object' && value !== null) {
+                if (seen.has(value)) return '[Circular]';
+                seen.add(value);
+            }
+            // 处理函数、Symbol、undefined等
+            if (typeof value === 'function') return '[Function]';
+            if (typeof value === 'symbol') return value.toString();
+            if (value === undefined) return '[Undefined]';
+            return value;
+        };
+        const jsonStr = JSON.stringify(obj, jsonSafeReplacer, 2);
+        console.log(`📦 3. JSON.stringify (安全处理循环引用):\n${jsonStr}`);
+    } catch (e) {
+        console.warn(`⚠️ JSON.stringify 失败:`, e);
+    }
+
+    // 4. 手动遍历自有可枚举属性（包括不可枚举属性名）
+    try {
+        const ownProps = Object.getOwnPropertyNames(obj);
+        const ownSymbols = Object.getOwnPropertySymbols(obj);
+        console.log(`🏷️ 4. 自有属性总览:`);
+        console.log(`   - 字符串属性名:`, ownProps);
+        console.log(`   - Symbol属性名:`, ownSymbols.map(s => s.toString()));
+
+        // 逐个输出属性描述符
+        if (ownProps.length > 0 || ownSymbols.length > 0) {
+            console.group(`📋 属性详情 (可枚举+不可枚举)`);
+            [...ownProps, ...ownSymbols].forEach(prop => {
+                try {
+                    const desc = Object.getOwnPropertyDescriptor(obj, prop);
+                    const value = desc?.value;
+                    let displayValue;
+                    if (typeof value === 'function') displayValue = '[Function]';
+                    else if (value && typeof value === 'object') displayValue = `{...} (${Object.keys(value).length} keys)`;
+                    else displayValue = value;
+                    console.log(`   ${prop.toString()}:`, {
+                        value: displayValue,
+                        enumerable: desc?.enumerable,
+                        writable: desc?.writable,
+                        configurable: desc?.configurable,
+                        getter: !!desc?.get,
+                        setter: !!desc?.set,
+                    });
+                } catch (e) {
+                    console.warn(`   读取属性 ${prop.toString()} 失败:`, e);
+                }
+            });
+            console.groupEnd();
+        } else {
+            console.log(`   (无自有属性)`);
+        }
+    } catch (e) {
+        console.warn(`⚠️ 遍历自有属性失败:`, e);
+    }
+
+    // 5. 访问原型链上的属性（可选）
+    if (showProto) {
+        try {
+            let proto = Object.getPrototypeOf(obj);
+            let level = 0;
+            console.group(`🔗 5. 原型链 (最多 ${maxDepth} 层)`);
+            while (proto && level < maxDepth) {
+                const protoProps = Object.getOwnPropertyNames(proto);
+                const protoSymbols = Object.getOwnPropertySymbols(proto);
+                console.log(`   [层 ${level + 1}] ${proto.constructor?.name || '匿名'}:`);
+                console.log(`      属性名:`, protoProps);
+                console.log(`      Symbols:`, protoSymbols.map(s => s.toString()));
+                if (protoProps.length > 0 || protoSymbols.length > 0) {
+                    // 可选：显示每个原型属性的值（可能很繁琐，这里只列前5个）
+                    const sampleProps = protoProps.slice(0, 5);
+                    sampleProps.forEach(p => {
+                        try {
+                            const val = obj[p];  // 实际访问到的实例值
+                            console.log(`      ${p}:`, typeof val === 'function' ? '[Function]' : val);
+                        } catch (e) {}
+                    });
+                }
+                proto = Object.getPrototypeOf(proto);
+                level++;
+            }
+            console.groupEnd();
+        } catch (e) {
+            console.warn(`⚠️ 原型链遍历失败:`, e);
+        }
+    }
+
+    // 6. 直接尝试访问你关心的已知属性（根据你的代码定制）
+    const knownProps = ['Pr', 'TextPr', 'Get_CompiledPr', 'CompiledPr'];
+    console.group(`🎯 6. 尝试直接读取已知属性 (根据你之前代码猜测)`);
+    knownProps.forEach(prop => {
+        try {
+            const value = obj[prop];
+            console.log(`   - ${prop}:`, value);
+            // 如果值是函数，尝试调用（谨慎）
+            if (typeof value === 'function' && prop === 'Get_CompiledPr') {
+                try {
+                    const result = value.call(obj);
+                    console.log(`     调用结果 (${prop}()):`, result);
+                } catch (e) {
+                    console.warn(`     调用失败:`, e);
+                }
+            }
+        } catch (e) {
+            console.warn(`   - ${prop}: 读取失败 ->`, e.message);
+        }
+    });
+    console.groupEnd();
+
+    // 7. 如果对象有 toJSON 方法，调用它（部分宿主对象有）
+    try {
+        if (typeof obj.toJSON === 'function') {
+            const jsonResult = obj.toJSON();
+            console.log(`🔄 7. 对象自带 toJSON() 结果:`, jsonResult);
+        }
+    } catch (e) {}
+
+    // 额外：打印对象的类型和构造函数名
+    console.log(`🏷️ 类型信息:`, {
+        typeof: typeof obj,
+        constructor: obj?.constructor?.name,
+        isPlainObject: Object.prototype.toString.call(obj) === '[object Object]',
+        isNull: obj === null,
+        isUndefined: obj === undefined,
+    });
+
+    console.groupEnd();
+}
 		try {
 			var oLogicDocument = this.private_GetLogicDocument();
 			if (!oLogicDocument) {
@@ -9450,15 +9597,15 @@ background-repeat: no-repeat;\
 			}
 			oLogicDocument.StartAction();
 			var oParagraph = oBookmark[0].GetParagraph();
-			console.log("1段落 CompiledPr:", oParagraph.Get_CompiledPr());
-			console.log("1段落:", oParagraph);
-			console.log("1段落 Pr:", oParagraph.Pr);
-			console.log("1段落 TextPr:", oParagraph.TextPr);
 			if (!oParagraph) {
 				oLogicDocument.FinalizeAction();
 				console.error("无法从书签获取段落");
 				return;
 			}
+			deepLog("1插入文本时的段落对象", oParagraph, { showProto: true, maxDepth: 2 });
+			deepLog("1段落 CompiledPr", oParagraph.Get_CompiledPr());
+			deepLog("1段落 Pr", oParagraph.Pr);
+			deepLog("1段落 TextPr", oParagraph.TextPr);
 
 			var content = oParagraph.Content;
 			// 尝试在同段落内找到一对书签索引
@@ -9502,12 +9649,12 @@ background-repeat: no-repeat;\
 			if (1 === type) {
 				var oRun = new AscCommonWord.ParaRun(oParagraph, false);
 				var newRunPr = oParagraph.Get_CompiledPr()?.ParaPr?.DefaultRunPr?.Copy();
-				console.log("插入文本时复制段落默认格式:", newRunPr);
-				console.log("插入文本内容:", text);
-				console.log("段落 CompiledPr:", oParagraph.Get_CompiledPr());
-				console.log("段落:", oParagraph);
-				console.log("段落 Pr:", oParagraph.Pr);
-				console.log("段落 TextPr:", oParagraph.TextPr);
+				deepLog("插入文本时复制段落默认格式:", newRunPr);
+				deepLog("插入文本内容:", text);
+				deepLog("插入文本时的段落对象", oParagraph, { showProto: true, maxDepth: 2 });
+				deepLog("段落 CompiledPr", oParagraph.Get_CompiledPr());
+				deepLog("段落 Pr", oParagraph.Pr);
+				deepLog("段落 TextPr", oParagraph.TextPr);
 				if (newRunPr) {
 					oRun.Set_Pr(newRunPr);
 				}
