@@ -9452,13 +9452,13 @@ function deepLog(label, obj, options = {}) {
         console.warn(`⚠️ console.dir 失败:`, e);
     }
 
-    // 3. 尝试 JSON.stringify（带循环引用处理）
-    try {
-        const jsonStr = JSON.stringify(obj);
-        console.log(`📦 3. JSON.stringify (安全处理循环引用):\n${jsonStr}`);
-    } catch (e) {
-        console.warn(`⚠️ JSON.stringify 失败:`, e);
-    }
+    // // 3. 尝试 JSON.stringify（带循环引用处理）
+    // try {
+    //     const jsonStr = JSON.stringify(obj);
+    //     console.log(`📦 3. JSON.stringify (安全处理循环引用):\n${jsonStr}`);
+    // } catch (e) {
+    //     console.warn(`⚠️ JSON.stringify 失败:`, e);
+    // }
 
     // 4. 手动遍历自有可枚举属性（包括不可枚举属性名）
     try {
