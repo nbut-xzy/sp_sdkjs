@@ -9451,10 +9451,30 @@ function deepLog(label, obj, options = {}) {
     } catch (e) {
         console.warn(`⚠️ console.dir 失败:`, e);
     }
-
+function safeStringify(obj, indent = 2) {
+    const seen = new WeakSet();
+    const replacer = (key, value) => {
+        if (typeof value === 'object' && value !== null) {
+            if (seen.has(value)) {
+                return '[Circular]';
+            }
+            seen.add(value);
+        }
+        // 处理函数、Symbol、undefined 等
+        if (typeof value === 'function') return '[Function]';
+        if (typeof value === 'symbol') return value.toString();
+        if (value === undefined) return '[Undefined]';
+        return value;
+    };
+    try {
+        return JSON.stringify(obj, replacer, indent);
+    } catch (e) {
+        return `[JSON.stringify失败: ${e.message}]`;
+    }
+}
     // 3. 尝试 JSON.stringify（带循环引用处理）
     try {
-        const jsonStr = JSON.stringify(obj);
+        const jsonStr = safeStringify(obj);
         console.log(`📦 3. JSON.stringify (安全处理循环引用):\n${jsonStr}`);
     } catch (e) {
         console.warn(`⚠️ JSON.stringify 失败:`, e);
