@@ -9454,19 +9454,7 @@ function deepLog(label, obj, options = {}) {
 
     // 3. 尝试 JSON.stringify（带循环引用处理）
     try {
-        const seen = new WeakSet();
-        const jsonSafeReplacer = (key, value) => {
-            if (typeof value === 'object' && value !== null) {
-                if (seen.has(value)) return '[Circular]';
-                seen.add(value);
-            }
-            // 处理函数、Symbol、undefined等
-            if (typeof value === 'function') return '[Function]';
-            if (typeof value === 'symbol') return value.toString();
-            if (value === undefined) return '[Undefined]';
-            return value;
-        };
-        const jsonStr = JSON.stringify(obj, jsonSafeReplacer, 2);
+        const jsonStr = JSON.stringify(obj);
         console.log(`📦 3. JSON.stringify (安全处理循环引用):\n${jsonStr}`);
     } catch (e) {
         console.warn(`⚠️ JSON.stringify 失败:`, e);
