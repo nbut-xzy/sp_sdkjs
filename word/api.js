@@ -9435,7 +9435,7 @@ background-repeat: no-repeat;\
 		}
 	};
 
-	asc_docs_api.prototype.asc_insertCustomText = function (text, sId, type) {
+	asc_docs_api.prototype.asc_insertCustomText = function (text, bookmarkName, type) {
 		try {
 			var oLogicDocument = this.private_GetLogicDocument();
 			if (!oLogicDocument) {
@@ -9443,9 +9443,9 @@ background-repeat: no-repeat;\
 				return false;
 			}
 			var oBookmarksManager = this.asc_GetBookmarksManager();
-			var oBookmark = oBookmarksManager.GetBookmarkByName(sId);
+			var oBookmark = oBookmarksManager.GetBookmarkByName(bookmarkName);
 			if (!oBookmark) {
-				console.warn("未找到书签: " + sId);
+				console.warn("未找到书签: " + bookmarkName);
 				return false;
 			}
 			oLogicDocument.StartAction();
@@ -9499,8 +9499,8 @@ background-repeat: no-repeat;\
 				var oRun = new AscCommonWord.ParaRun(oParagraph, false);
 				// 此处已经是副本
 				var newRunPr = oParagraph.GetFirstRunPr();
-				debugger;
 				if (newRunPr) {
+					// 使用段落中定义的字体等样式
 					oRun.Set_Pr(newRunPr);
 				}
 				oRun.AddText(text);
@@ -9514,11 +9514,11 @@ background-repeat: no-repeat;\
 			oLogicDocument.UpdateInterface();
 			oLogicDocument.UpdateSelection();
 			oLogicDocument.FinalizeAction();
-			console.log("插入签名时间完成");
+			console.log("在书签内插入自定义文本完成");
 
 			return true;
 		} catch (e) {
-			console.error("插入签名过程中发生错误:", e);
+			console.error("在书签内插入自定义文本发生错误:", e);
 			return false;
 		}
 	}
