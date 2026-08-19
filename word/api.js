@@ -9395,13 +9395,17 @@ background-repeat: no-repeat;\
 				if (insertPos > oParagraph.Content.length) insertPos = oParagraph.Content.length;
 
 				// 仅在 type === 1 且图像有效时插入 drawing；否则只清空原有书签区内容（书签位置保持不变）
-				if (1 === type && loadedImage && loadedImage.Image) {
+				if ((1 === type || 0 === type) && loadedImage && loadedImage.Image) {
 					var oImage = oLogicDocument.DrawingObjects.createImage(loadedImage.src, 0, 0, width, height);
 					var oDrawing = new AscCommonWord.ParaDrawing(width, height, oImage, oLogicDocument.DrawingDocument, null, null);
 					oImage.setParent(oDrawing);
 					oDrawing.Set_GraphicObject(oImage);
 					var oImageProps = new asc_CImgProperty();
-					oImageProps.asc_putWrappingStyle(c_oAscWrapStyle2.Inline);
+					if (1 === type){
+						oImageProps.asc_putWrappingStyle(c_oAscWrapStyle2.Inline);
+					} else if (0 === type){
+						oImageProps.asc_putWrappingStyle(c_oAscWrapStyle2.InFront);
+					}
 					oDrawing.Set_Props(oImageProps);
 
 					var oRun = new AscCommonWord.ParaRun(oParagraph, false);
